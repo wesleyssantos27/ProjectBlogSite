@@ -1,18 +1,17 @@
 from webbrowser import get
 from flask import render_template, redirect, url_for, flash, request
 from comunidadeimpressionadora import app, database, bcrypt
-from comunidadeimpressionadora.forms import FormLogin, FormCriarConta, FormEditarPerfil
-from comunidadeimpressionadora.models import Usuario
+from comunidadeimpressionadora.forms import FormLogin, FormCriarConta, FormEditarPerfil, FormCriarPost
+from comunidadeimpressionadora.models import Usuario, Post
 from flask_login import login_user, logout_user, current_user, login_required
 import secrets
 import os
 from PIL import Image
 
-lista_usuarios = ['João','Maria','Julia','Cecília','Wesley']
-
 @app.route('/')
 def home():
-    return render_template('home.html')
+    posts = Post.query.all()
+    return render_template('home.html', posts=posts)
 
 @app.route('/contatos')
 def contatos():
@@ -21,6 +20,7 @@ def contatos():
 @app.route('/usuarios')
 @login_required
 def usuarios():
+    lista_usuarios = Usuario.query.all()
     return render_template('usuarios.html', lista_usuarios=lista_usuarios)
 
 @app.route('/login', methods=['GET','POST'])
@@ -61,10 +61,17 @@ def perfil():
     foto_perfil = url_for('static', filename='profile_images/{}'.format(current_user.foto_perfil))
     return render_template('perfil.html', foto_perfil=foto_perfil)
 
-@app.route('/post/criar')
+@app.route('/post/criar', methods=['GET','POST'])
 @login_required
 def criar_post():
-    return render_template('criarpost.html')
+    form_post = FormCriarPost()
+    if form_post.validate_on_submit():
+        post = Post(titulo=form_post.titulo.data, corpo=form_post.corpo.data, autor=current_user)
+        database.session.add(post)
+        database.session.commit()
+        flash('Post criado com sucesso','alert-success')
+        return redirect(url_for('home'))
+    return render_template('criarpost.html', form_post=form_post)
 
 def salvar_imagem(imagem):
     codigo = secrets.token_hex(8)
@@ -82,8 +89,9 @@ def salvar_imagem(imagem):
 
 def atualizar_cursos(form):
     lista_cursos = []
-    for campo in form and campo.data:
-        lista_cursos.append(campo.label.text)
+    for campo in form:
+        if 'curso_' in campo.name and campo.data:
+            lista_cursos.append(campo.label.text)
     return ";".join(lista_cursos)
 
 

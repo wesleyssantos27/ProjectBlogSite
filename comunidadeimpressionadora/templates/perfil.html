@@ -12,10 +12,18 @@
                 <h4 class="mb-0 mt-0">{{ current_user.username }}</h4>
                 <span>{{ current_user.email }}</span>
                 <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
+                    {% if 'Não Informado' in current_user.cursos or current_user.cursos == '' %}
                     <div class="d-flex flex-column">
-                        <span class="articles">Articles</span>
+                        <span class="articles">Cursos</span>
                         <span class="number1">0</span>
                     </div>
+                    {% else %}
+                    <div class="d-flex flex-column">
+                        <span class="articles">Cursos</span>
+                        <span class="number1">{{ current_user.cursos.count(';') + 1}}</span>
+                    </div>
+                    {% endif %}
+                    
                     <div class="d-flex flex-column">
                         <span class="rating">Rating</span>
                         <span class="number3">0</span>
@@ -29,6 +37,19 @@
         </div>
     </div>
 </div>
+<div class="row justify-content-center">
+    <div class="col col-4" style="text-align: center">
+        <strong>Cursos</strong><br>
+        {% if current_user.cursos %}
+            {% for curso in current_user.cursos.split(';') %}
+            <button type="button" class="btn btn-success mt-2" disabled>{{ curso }}</button>
+            {% endfor %}
+        {% else %}
+            <p> Nenhum curso cadastrado </p>
+        {% endif %}
+    </div>
+</div>
+
 {% block form_editarperfil %}
 {% endblock %}
 {% endblock %}
