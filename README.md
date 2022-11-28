@@ -1,2 +1,2 @@
 # ProjectBlogSite
- Criação de site em formato de blog seguindo os passos do curso da Hashtag
+ Criação de site em formato de blog seguindo utilizando Pyhton e Flask
